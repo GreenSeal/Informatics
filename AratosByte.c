@@ -2,14 +2,22 @@
 #include<stdlib.h>
 #include<math.h>
 #include<assert.h>
+#include<limits.h>
 
 struct sieve_t {
         unsigned size;
         unsigned char* sieve;
 };
 
+int sieve_get_bit(int index, const struct sieve_t aratos) {
+	unsigned posi = 0;
+	posi = (unsigned) index/8;
+	if(index < CHAR_BIT*posi) posi = posi - 1;
+	return ((aratos.sieve[posi] >> index%CHAR_BIT) & 1u); 
+}
+
 struct sieve_t init_sieve (unsigned n) {
-        unsigned char* sieve = (unsigned char*) calloc((unsigned) n/8 + 7, sizeof(unsigned char));
+        unsigned char* sieve = (unsigned char*) calloc((unsigned) n/CHAR_BIT + CHAR_BIT - 1, sizeof(unsigned char));
         struct sieve_t res = {n, sieve};
         assert((n > 1) && (sieve != NULL));
 
@@ -20,16 +28,13 @@ struct sieve_t init_sieve (unsigned n) {
         unsigned i = 0, j = 0, posi = 0, posj = 0;
 
         for(i = 2; i <= r; i ++) {
-		posi = (unsigned) i/8;
-		if(i < 8*posi)	posi = posi - 1;
 
+                if (!sieve_get_bit(i, res)) {
+                        for(j = 2*i ;j <= n - 1 ;j += i) {
+				posj = (unsigned) j/CHAR_BIT;
+				if(j < CHAR_BIT*posj) posj = posj - 1;
 
-                if (((res.sieve[posi] >> i%8) & 1u) == 0) {
-                        for(j = 2*i ;j <= n ;j += i) {
-				posj = (unsigned) j/8;
-				if(j < 8*posj) posj = posj - 1;
-
-				res.sieve[posj] = res.sieve[posj] | (1u << j%8);
+				res.sieve[posj] = res.sieve[posj] | (1u << j%CHAR_BIT);
                         }
                 }
         }
@@ -44,14 +49,22 @@ void free_sieve(struct sieve_t* s) {
 }
 
 int main() {
-        struct sieve_t aratos = init_sieve(100);
-        unsigned i = 0, pos = 0;
-        for(i = 0; i <= aratos.size; i++) {
-		pos = (unsigned) i/8;
-		if (8*pos > i) pos = pos - 1;
-
-                printf("%d\n", (aratos.sieve[pos] >> i%8) & 1u);
+	int n = 0, count  = 0, simpnum = 0;
+	const int SIMPLE_PER_NUM = 20;
+	printf("Enter the number of needed prime ");
+	scanf("%d", &n);
+        struct sieve_t aratos = init_sieve(SIMPLE_PER_NUM*n);
+	unsigned i = 0, pos = 0;
+        for(i = 0; i <= aratos.size - 1; i++) {
+		
+		if(!sieve_get_bit(i, aratos)) count++;
+		if(count == n) {
+			simpnum = i;
+			break;
+		}
         }
+
+	printf("\n%d-th simple number is %d\n", n, simpnum);
         free_sieve(&aratos);
 
         return 0;
