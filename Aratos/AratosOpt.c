@@ -98,12 +98,24 @@ int main() {
 	printf("Enter the number of needed prime ");
 	scanf("%llu", &n);
 	size = SIMPLE_PER_NUM*n;
-	unsigned char* mod1 = (unsigned char*) calloc((unsigned long) size/48 + 2, sizeof(unsigned char));
-        unsigned char* mod5 = (unsigned char*) calloc((unsigned long) size/48 + 2, sizeof(unsigned char));
+
+	printf("\ncccccccccccc");
+	unsigned char* mod1 = (unsigned char*) calloc((unsigned long long) size/48 + 2, sizeof(unsigned char));
+
+	printf("\nddddddddddddddddd");
+        unsigned char* mod5 = (unsigned char*) calloc((unsigned long long) size/48 + 2, sizeof(unsigned char));
+	printf("\nfffffffffffffff");
         struct sieve_t aratos = {size, mod1, mod5};
+
+	printf("\neeeeeeeeeeeeeee");
 	assert((size > 1) && (mod1 != NULL) && (mod5 != NULL));
+	
+
+	printf("\naaaaaaaaaaaaa");
 
 	init_sieve(&aratos);
+
+	printf("\nbbbbbbbbbbbbbb");
 
         unsigned long long i = 0, pos = 0;
         for(i = 0; i <= size - 1; i++) {
