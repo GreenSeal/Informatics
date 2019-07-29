@@ -60,24 +60,11 @@ void init_sieve (struct sieve_t *sv) {
 
         for(i = 1; i <= r; i++) {
 
-		if(i%(unsigned long long)(r/100) == 0) printf("\nprogress:%llu", i*100/r);
+		if((r >= 1000) && (i%(unsigned long long)(r/100) == 0)) printf("\nprogress:%llu", i*100/r);
 
 		if(!sieve_get_bit(i, *sv)){
 
 			for(j = 2*i; j <= (sv -> n) - 1; j += i) {
-				/*if((j - 1)%6 == 0) {
-					posj = (unsigned long long) (j-1)/(6*CHAR_BIT);
-					if((posj*6*CHAR_BIT + 1) > j) posj = posj - 1;
-
-					sv -> mod1[posj] = (sv -> mod1[posj]) | (1u << ((j-1)/6)%CHAR_BIT);
-				}
-
-				if((j - 5)%6 == 0) {
-					posj = (unsigned long long) (j-5)/(6*CHAR_BIT);
-					if((posj*6*CHAR_BIT + 5) > j) posj = posj - 1;
-
-					sv -> mod5[posj] = (sv -> mod5[posj]) | (1u << ((j-5)/6)%CHAR_BIT);
-				}*/
 				sieve_set_bit(sv, j);
 			}
 		}
@@ -98,24 +85,13 @@ int main() {
 	printf("Enter the number of needed prime ");
 	scanf("%llu", &n);
 	size = SIMPLE_PER_NUM*n;
-
-	printf("\ncccccccccccc");
 	unsigned char* mod1 = (unsigned char*) calloc((unsigned long long) size/48 + 2, sizeof(unsigned char));
-
-	printf("\nddddddddddddddddd");
         unsigned char* mod5 = (unsigned char*) calloc((unsigned long long) size/48 + 2, sizeof(unsigned char));
-	printf("\nfffffffffffffff");
         struct sieve_t aratos = {size, mod1, mod5};
 
-	printf("\neeeeeeeeeeeeeee");
 	assert((size > 1) && (mod1 != NULL) && (mod5 != NULL));
-	
-
-	printf("\naaaaaaaaaaaaa");
 
 	init_sieve(&aratos);
-
-	printf("\nbbbbbbbbbbbbbb");
 
         unsigned long long i = 0, pos = 0;
         for(i = 0; i <= size - 1; i++) {
