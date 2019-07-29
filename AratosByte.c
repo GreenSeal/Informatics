@@ -50,7 +50,7 @@ void free_sieve(struct sieve_t* s) {
 
 int main() {
 	int n = 0, count  = 0, simpnum = 0;
-	const int SIMPLE_PER_NUM = 20;
+	const int SIMPLE_PER_NUM = 26;
 	printf("Enter the number of needed prime ");
 	scanf("%d", &n);
         struct sieve_t aratos = init_sieve(SIMPLE_PER_NUM*n);
