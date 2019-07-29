@@ -10,36 +10,56 @@ struct sieve_t {
 	unsigned char* mod5;
 };
 
-int sieve_get_bit(int index, const unsigned char* sieve) {
+int sieve_get_bit(int num, const struct sieve_t aratos/*, int* mode_code*/) {
 	unsigned posi = 0;
-	posi = (unsigned) index/8;
-	if(index < CHAR_BIT*posi) posi = posi - 1;
-	return ((sieve[posi] >> index%CHAR_BIT) & 1u);
+
+	if((num - 1)%6 == 0) {
+	posi = (unsigned) (num-1)/(6*CHAR_BIT);
+	if(num < (6*CHAR_BIT*posi + 1)) posi = posi - 1;
+	
+	//*mode_code = 1;
+	return ((aratos.mod1[posi] >> ((num-1)/6)%CHAR_BIT) & 1u);
+	}
+	
+
+	
+	if((num - 5)%6 == 0) {
+
+	posi = (unsigned) (num - 5)/(6*CHAR_BIT);
+	if(num < (6*CHAR_BIT*posi + 5)) posi = posi - 1;
+
+	//*mode_code = 5;
+	return ((aratos.mod5[posi] >> ((num-5)/6)%CHAR_BIT) & 1u);
+	}
+
+	else return 1;
 }
 
 void init_sieve (struct sieve_t *sv) {
 
-	unsigned i = 0, j = 0, posi = 0, posj = 0;
+	unsigned i = 0, j = 0, posi = 0, posj = 0, r = sqrt(sv -> n) + 1, mode_code = 0;
 	sv -> mod1[0] = (sv -> mod1[0]) | 1u;
 
-        for(i = 1; i <= (sv -> n) - 1; i++) {
+        for(i = 1; i <= r; i++) {
 
-		posi = (unsigned) i/CHAR_BIT;
-		if (CHAR_BIT*posi > i) posi = posi - 1;
+		if(!sieve_get_bit(i, *sv)){
 
-		for(j = 2; j <= (unsigned) sqrt(6*i + 1) + 1; j++) {
-			if ((6*i + 1)%j == 0) (sv -> mod1[posi]) = (sv -> mod1[posi]) | (1u << i%CHAR_BIT);
+			for(j = 2*i; j <= (sv -> n) - 1; j += i) {
+				if((j - 1)%6 == 0) {
+					posj = (unsigned) (j-1)/(6*CHAR_BIT);
+					if((posj*6*CHAR_BIT + 1) > j) posj = posj - 1;
+
+					sv -> mod1[posj] = (sv -> mod1[posj]) | (1u << ((j-1)/6)%CHAR_BIT);
+				}
+
+				if((j - 5)%6 == 0) {
+					posj = (unsigned) (j-5)/(6*CHAR_BIT);
+					if((posj*6*CHAR_BIT + 5) > j) posj = posj - 1;
+
+					sv -> mod5[posj] = (sv -> mod5[posj]) | (1u << ((j-5)/6)%CHAR_BIT);
+				}
+			}
 		}
-        }
-
-	for(i = 0; i <=  (sv -> n); i++) {
-
-                posi = (unsigned) i/CHAR_BIT;
-                if (CHAR_BIT*posi > i) posi = posi - 1;
-
-                for(j = 2; j <= (unsigned) sqrt(6*i + 5) + 1; j++) {
-                        if ((6*i + 5)%j == 0) (sv -> mod5[posi]) = (sv -> mod5[posi]) | (1u << i%CHAR_BIT);
-                }
         }
 }
 
@@ -53,7 +73,7 @@ void free_sieve(struct sieve_t* s) {
 
 int main() {
 	int n = 0, count = 2, simpnum = 0, size = 0;
-	const int SIMPLE_PER_NUM = 10;
+	const int SIMPLE_PER_NUM = 21;
 	printf("Enter the number of needed prime ");
 	scanf("%d", &n);
 	size = SIMPLE_PER_NUM*n;
@@ -67,21 +87,14 @@ int main() {
         unsigned i = 0, pos = 0;
         for(i = 0; i <= size - 1; i++) {
                 
-		if (!sieve_get_bit(i, aratos.mod1)) count++;
+		if (!sieve_get_bit(i, aratos)) count++;
 		
 		if(count == n) {
-			simpnum = 6*i+1;
+			simpnum = i;
 			break;
 		}
 		
-		if (!sieve_get_bit(i, aratos.mod5)) count++;
-
-		if (count == n) {
-			simpnum = 6*i+5;
-			break;
-		}
-
-		//printf("\ncount:%d", count);
+		if(i % 1000000 == 0) printf("\ncount:%d", count);
 	}
 
 	printf("\n%d-th simple number is %d\n", n, simpnum);
