@@ -58,17 +58,36 @@ void init_sieve (struct sieve_t *sv) {
 	unsigned long long i = 0, j = 0, posi = 0, posj = 0, r = sqrt(sv -> n) + 1, mode_code = 0;
 	sv -> mod1[0] = (sv -> mod1[0]) | 1u;
 
-        for(i = 1; i <= r; i++) {
+        for(i = 0; 6*i <= r; i++) {
 
-		if((r >= 1000) && (i%(unsigned long long)(r/100) == 0)) printf("\nprogress:%llu", i*100/r);
+		//if((r >= 1000) && (i%(unsigned long long)(r/100) == 0)) printf("\nprogress:%llu", i*100/r);
 
-		if(!sieve_get_bit(i, *sv)){
+		if(!sieve_get_bit(6*i + 1, *sv)) {
 
-			for(j = 2*i; j <= (sv -> n) - 1; j += i) {
+			for(j = 2*(6*i + 1); j <= (sv -> n) - 1; j += (6*i + 1)) {
+				sieve_set_bit(sv, j);
+			}
+		}
+
+		if(!sieve_get_bit(6*i + 5, *sv)) {
+			
+			for(j = 2*(6*i + 5); j <= (sv -> n) - 1; j += (6*i + 5)) {
 				sieve_set_bit(sv, j);
 			}
 		}
         }
+}
+
+unsigned long long sieve_size(unsigned long long n) {
+	
+	if(n > 30) {
+		float dnum = n;
+		float dres = dnum*(log(dnum) + log(log(dnum)));
+		//printf("%f\n", dres);
+		return (unsigned long long) dres;
+	}
+
+	else return 300;
 }
 
 void free_sieve(struct sieve_t* s) {
@@ -84,7 +103,8 @@ int main() {
 	const int SIMPLE_PER_NUM = 26;
 	printf("Enter the number of needed prime ");
 	scanf("%llu", &n);
-	size = SIMPLE_PER_NUM*n;
+	size = sieve_size(n);
+	//printf("size: %llu\n", size);
 	unsigned char* mod1 = (unsigned char*) calloc((unsigned long long) size/48 + 2, sizeof(unsigned char));
         unsigned char* mod5 = (unsigned char*) calloc((unsigned long long) size/48 + 2, sizeof(unsigned char));
         struct sieve_t aratos = {size, mod1, mod5};
