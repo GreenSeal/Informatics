@@ -15,20 +15,20 @@ int sieve_get_bit(unsigned long long num, const struct sieve_t aratos/*, int* mo
 
 	if((num - 1)%6 == 0) {
 
-	posi = (unsigned long long) (num-1)/(6*CHAR_BIT);
-	if(num < (6*CHAR_BIT*posi + 1)) posi = posi - 1;
+		posi = (unsigned long long) (num-1)/(6*CHAR_BIT);
+		if(num < (6*CHAR_BIT*posi + 1)) posi = posi - 1;
 	
-	return ((aratos.mod1[posi] >> ((num-1)/6)%CHAR_BIT) & 1u);
+		return ((aratos.mod1[posi] >> ((num-1)/6)%CHAR_BIT) & 1u);
 	}
 	
 
 	
 	if((num - 5)%6 == 0) {
 
-	posi = (unsigned long long) (num - 5)/(6*CHAR_BIT);
-	if(num < (6*CHAR_BIT*posi + 5)) posi = posi - 1;
+		posi = (unsigned long long) (num - 5)/(6*CHAR_BIT);
+		if(num < (6*CHAR_BIT*posi + 5)) posi = posi - 1;
 
-	return ((aratos.mod5[posi] >> ((num-5)/6)%CHAR_BIT) & 1u);
+		return ((aratos.mod5[posi] >> ((num-5)/6)%CHAR_BIT) & 1u);
 	}
 
 	else return 1;
