@@ -3,58 +3,97 @@
 #include<stdlib.h>
 #include<time.h>
 #include<math.h>
+#include<limits.h>
+
+unsigned long long pow_mod_exc_mult(unsigned long long mult, unsigned long long mod,unsigned long long MAX_NUM) {
+	unsigned long long k = 0, rem_m = 0, count = 0;
+
+	rem_m = mult;
+	mult = 0;
+
+	while(rem_m > MAX_NUM) {
+		k++;
+		rem_m = rem_m - MAX_NUM;
+	}
+
+	count = k*k;
+
+	while(count > 0) {
+		mult = (mult + (MAX_NUM * MAX_NUM) % mod) % mod;
+		count--;
+	}
+
+	count = 2*k;
+
+	while(count > 0) {
+		count--;	
+		mult = (mult + (MAX_NUM * rem_m) % mod) % mod;
+	}
+
+	mult = (mult + (rem_m * rem_m) % mod) % mod;
+	return mult;
+}
+
+
+unsigned long long pow_mod_exc_prod(unsigned long long mult, unsigned long long prod, unsigned long long mod,unsigned long long MAX_NUM) {
+	
+	unsigned long long k1 = 0, k2 = 0, rem_p = 0, rem_m = 0, count = 0;	
+
+	rem_p = prod;
+	rem_m = mult;
+
+	if(prod > MAX_NUM) {
+		while (rem_p > MAX_NUM) {
+			k1++;
+			rem_p = rem_p - MAX_NUM;
+		}
+	}
+
+	if(mult > MAX_NUM) {
+		while (rem_m > MAX_NUM) {
+			k2++;
+			rem_m = rem_m - MAX_NUM;
+		}
+	}
+				
+	count = k1*k2;
+	prod = 0;
+
+	while (count > 0) {
+		prod = (prod + (MAX_NUM * MAX_NUM) % mod) % mod;
+		count--;
+	}
+
+	count = k1;
+
+	while (count > 0) {
+		prod = (prod + (rem_m * MAX_NUM) % mod) % mod;
+		count--;
+	}
+
+	count = k2;
+
+	while (count > 0) {
+		prod = (prod + (rem_p * MAX_NUM) % mod) % mod;
+		count--;
+	}
+
+	prod = (prod + (rem_p * rem_m) % mod) % mod;
+	return prod;
+}
 
 unsigned long long pow_mod (unsigned long long n, unsigned long long k, unsigned long long m) {
 	unsigned long long mult = n % m;
 	unsigned long long prod = 1;
 	unsigned long long k1 = 0, rem_p = 0, k2 = 0, rem_m = 0, count = 0;
-	unsigned long long MAX_NUM = 2000000000;
+	unsigned long long MAX_NUM = sqrt(ULLONG_MAX) - 2;
 	while(k > 0) {
 		k1 = 0;
 		k2 = 0;
 
 		if ((k % 2) == 1) {
-			if (prod > MAX_NUM || mult > MAX_NUM) {
-				rem_p = prod;
-				rem_m = mult;
-
-				if(prod > MAX_NUM) {
-					while (rem_p > MAX_NUM) {
-						k1++;
-						rem_p = rem_p - MAX_NUM;
-					}
-				}
-
-				if(mult > MAX_NUM) {
-					while (rem_m > MAX_NUM) {
-						k2++;
-						rem_m = rem_m - MAX_NUM;
-					}
-				}
-				
-				count = k1*k2;
-				prod = 0;
-
-				while (count > 0) {
-					prod = (prod + (MAX_NUM * MAX_NUM) % m) % m;
-					count--;
-				}
-
-				count = k1;
-
-				while (count > 0) {
-					prod = (prod + (rem_m * MAX_NUM) % m) % m;
-					count--;
-				}
-
-				count = k2;
-
-				while (count > 0) {
-					prod = (prod + (rem_p * MAX_NUM) % m) % m;
-					count--;
-				}
-
-				prod = (prod + (rem_p * rem_m) % m) % m;
+			if (round((ULLONG_MAX -1)/prod) < mult) {
+				prod = pow_mod_exc_prod(mult, prod, m, MAX_NUM);
 			}
 
 			else {
@@ -67,30 +106,9 @@ unsigned long long pow_mod (unsigned long long n, unsigned long long k, unsigned
 
 		else {
 
-			if(mult > MAX_NUM) {
-				rem_m = mult;
-				mult = 0;
+			if(round((ULLONG_MAX - 1)/mult) < mult) {
 
-				while(rem_m > MAX_NUM) {
-					k2++;
-					rem_m = rem_m - MAX_NUM;
-				}
-
-				count = k2*k2;
-
-				while(count > 0) {
-					mult = (mult + (MAX_NUM * MAX_NUM) % m) % m;
-					count--;
-				}
-
-				count = 2*k2;
-
-				while(count > 0) {
-					count--;	
-					mult = (mult + (MAX_NUM * rem_m) % m) % m;
-				}
-
-				mult = (mult + (rem_m * rem_m) % m) % m;
+				mult = pow_mod_exc_mult(mult, m, MAX_NUM);
 			}
 
 			else {
