@@ -139,7 +139,7 @@ int is_prime(unsigned long long num) {
 
 	d = (num - 1) / pow(2, r);
 
-	printf("r = %d   d = %llu\n", r, d);
+	//printf("r = %d   d = %llu\n", r, d);
 
 	dlimit = 2*log(num)*log(num);
 	limit = round(dlimit);
