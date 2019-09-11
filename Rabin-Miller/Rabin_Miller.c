@@ -2,8 +2,14 @@
 #include<stdlib.h>
 #include<math.h>
 #include<limits.h>
+#include<assert.h>
+#include"Rabin_Miller.h"
 
-unsigned long long pow_mod_exc_mult(unsigned long long mult, unsigned long long mod, unsigned long long MAX_NUM) {
+unsigned long long MAX_NUM = sqrt(ULLONG_MAX) - 2;
+
+
+/*if mult*mult more MAX_NUM function divide mult on terms by MAX_NUM and then multplies terms*/
+unsigned long long pow_mod_exc_mult(unsigned long long mult, unsigned long long mod) {
 	unsigned long long k = 0, rem_m = 0, count = 0;
 	
 	//printf("ddddddddd\n");
@@ -33,8 +39,8 @@ unsigned long long pow_mod_exc_mult(unsigned long long mult, unsigned long long 
 	return mult;
 }
 
-
-unsigned long long pow_mod_exc_prod(unsigned long long mult, unsigned long long prod, unsigned long long mod, unsigned long long MAX_NUM) {
+/*if prod*mult more MAX_NUM function divide mult and prod on terms by MAX_NUM and then multplies terms*/
+unsigned long long pow_mod_exc_prod(unsigned long long mult, unsigned long long prod, unsigned long long mod) {
 	
 	unsigned long long k1 = 0, k2 = 0, rem_p = 0, rem_m = 0, count = 0;	
 
@@ -91,7 +97,7 @@ unsigned long long pow_mod (unsigned long long n, unsigned long long k, unsigned
 		//printf("bbbbbbb\n");
 		if ((k % 2) == 1) {
 			if (prod != 0 && round((ULLONG_MAX - 1)/prod) < mult) {
-				prod = pow_mod_exc_prod(mult, prod, m, MAX_NUM);
+				prod = pow_mod_exc_prod(mult, prod, m);
 			}
 
 			else {
@@ -107,7 +113,7 @@ unsigned long long pow_mod (unsigned long long n, unsigned long long k, unsigned
 
 			if(mult != 0 && round((ULLONG_MAX - 1)/mult) < mult) {
 
-				mult = pow_mod_exc_mult(mult, m, MAX_NUM);
+				mult = pow_mod_exc_mult(mult, m);
 			}
 
 			else {
@@ -125,10 +131,20 @@ unsigned long long pow_mod (unsigned long long n, unsigned long long k, unsigned
 
 int is_prime(unsigned long long num) {
 	int r = 0, code_cyc = 0;
-	unsigned long long d = 0, i = 0, limit = 0, x = 0, j = 0;
-	double dlimit = 0;
+	unsigned long long d = 0, i = 0, x = 0, j = 0;
+	int a_for_test[15] = {2, 3, 5, 7, 11, 13, 17, 19, 23, 29, 31, 37, 61, 73, 1662803};
+	
+	if(num == 2 || num == 3) return 1;
+
+	if(num < 2) return 0;
 
 	if(num % 2 == 0)
+		return 0;
+
+	if(num % 3 == 0)
+		return 0;
+
+	if(num % 5 == 0)
 		return 0;
 
 	for (i = num  - 1; i > 1; i = i/2) {
@@ -139,45 +155,73 @@ int is_prime(unsigned long long num) {
 
 	d = (num - 1) / pow(2, r);
 
-	//printf("r = %d   d = %llu\n", r, d);
+	if(num < 4759123141) {
+		a_for_test[1] = 7;
+		a_for_test[2] = 61;
 
-	dlimit = 2*log(num)*log(num);
-	limit = round(dlimit);
-	if (dlimit < limit) 
-		limit = limit - 1;
+		for(i = 0; i <= 2; i++) {
 
-	if(limit > num - 2)
-		limit = num - 2;
-
-	for(i = 2; i <= limit; i++) {
-		code_cyc = 0;
-		x = pow_mod(i, d, num);
-		if((x == 1) || x == num - 1) 
-			continue;
-		
-		for (j = 0; j < r-1; j++) {
-			x = pow_mod(x, 2, num);
-			if(x == num - 1) {
-				code_cyc = 1;
-				break;
+			if(num == a_for_test[i]){
+				return 1;
 			}
+			
+			code_cyc = 0;
+			x = pow_mod(a_for_test[i], d, num);
+			if((x == 1) || x == num - 1) 
+				continue;
+		
+			for (j = 0; j < r-1; j++) {
+				x = pow_mod(x, 2, num);
+				if(x == num - 1) {
+					code_cyc = 1;
+					break;
+				}
+			}
+
+			if(code_cyc == 1) 
+				continue;
+		
+			return 0;		
 		}
 
-		if(code_cyc == 1) 
-			continue;
-		
-		return 0;		
+		return 1;
 	}
 
-	return 1;
+	//printf("r = %d   d = %llu\n", r, d);
+	
+	else {
+		for(i = 0; i <= 11; i++) {
+			code_cyc = 0;
+			x = pow_mod(a_for_test[i], d, num);
+			if((x == 1) || x == num - 1) 
+				continue;
+		
+			for (j = 0; j < r-1; j++) {
+				x = pow_mod(x, 2, num);
+				if(x == num - 1) {
+					code_cyc = 1;
+					break;
+				}
+			}
+
+			if(code_cyc == 1) 
+				continue;
+		
+			return 0;		
+		}
+
+		return 1;
+	}
 }
 
 
-
+#if 0 
 int main() {
-	unsigned long long p = 0;
-	scanf("%llu", &p);
+	unsigned long long p = 0, code_input = 0;
+	code_input = scanf("%llu", &p);
+	assert(code_input == 1);
 	if(is_prime(p) == 1) printf("Num is simple\n");\
 	else printf("Num is composite\n");
 	return 0;
 }
+#endif
