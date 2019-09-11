@@ -18,7 +18,7 @@ int sieve_get_bit(unsigned long long num, const struct sieve_t aratos/*, int* mo
 		posi = (unsigned long long) (num-1)/(6*CHAR_BIT);
 		if(num < (6*CHAR_BIT*posi + 1)) posi = posi - 1;
 	
-		return ((aratos.mod1[posi] >> ((num-1)/6)%CHAR_BIT) & 1u);
+		return !((aratos.mod1[posi] >> ((num-1)/6)%CHAR_BIT) & 1u);
 	}
 	
 
@@ -28,10 +28,10 @@ int sieve_get_bit(unsigned long long num, const struct sieve_t aratos/*, int* mo
 		posi = (unsigned long long) (num - 5)/(6*CHAR_BIT);
 		if(num < (6*CHAR_BIT*posi + 5)) posi = posi - 1;
 
-		return ((aratos.mod5[posi] >> ((num-5)/6)%CHAR_BIT) & 1u);
+		return !((aratos.mod5[posi] >> ((num-5)/6)%CHAR_BIT) & 1u);
 	}
 
-	else return 1;
+	else return 0;
 }
 
 void sieve_set_bit(struct sieve_t* sv, unsigned long long j){
@@ -62,14 +62,14 @@ void init_sieve (struct sieve_t *sv) {
 
 		//if((r >= 1000) && (i%(unsigned long long)(r/100) == 0)) printf("\nprogress:%llu", i*100/r);
 
-		if(!sieve_get_bit(6*i + 1, *sv)) {
+		if(sieve_get_bit(6*i + 1, *sv)) {
 
 			for(j = 2*(6*i + 1); j <= (sv -> n) - 1; j += (6*i + 1)) {
 				sieve_set_bit(sv, j);
 			}
 		}
 
-		if(!sieve_get_bit(6*i + 5, *sv)) {
+		if(sieve_get_bit(6*i + 5, *sv)) {
 			
 			for(j = 2*(6*i + 5); j <= (sv -> n) - 1; j += (6*i + 5)) {
 				sieve_set_bit(sv, j);
@@ -100,7 +100,6 @@ void free_sieve(struct sieve_t* s) {
 
 int main() {
 	unsigned long long n = 0, count = 2, simpnum = 0, size = 0;
-	const int SIMPLE_PER_NUM = 26;
 	printf("Enter the number of needed prime ");
 	scanf("%llu", &n);
 	size = sieve_size(n);
@@ -116,7 +115,7 @@ int main() {
         unsigned long long i = 0, pos = 0;
         for(i = 0; i <= size - 1; i++) {
                 
-		if (!sieve_get_bit(i, aratos)) count++;
+		if (sieve_get_bit(i, aratos)) count++;
 		
 		if(count == n) {
 			simpnum = i;
