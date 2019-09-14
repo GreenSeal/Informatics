@@ -12,7 +12,6 @@ unsigned long long MAX_NUM = sqrt(ULLONG_MAX) - 2;
 unsigned long long pow_mod_exc_mult(unsigned long long mult, unsigned long long mod) {
 	unsigned long long k = 0, rem_m = 0, count = 0;
 	
-	//printf("ddddddddd\n");
 	rem_m = mult;
 	mult = 0;
 
@@ -46,8 +45,6 @@ unsigned long long pow_mod_exc_prod(unsigned long long mult, unsigned long long 
 
 	rem_p = prod;
 	rem_m = mult;
-
-	//printf("cccccccc\n");
 
 	if(prod > MAX_NUM) {
 		while (rem_p > MAX_NUM) {
@@ -89,44 +86,76 @@ unsigned long long pow_mod_exc_prod(unsigned long long mult, unsigned long long 
 	return prod;
 }
 
+unsigned long long mult_mod(unsigned long long mult, unsigned long long m) {
+	if(mult != 0 && round((ULLONG_MAX - 1)/mult) < mult) {
+		mult = pow_mod_exc_mult(mult, m);
+	}
+
+	else mult = (mult * mult) % m;
+
+	return mult;
+}
+
+unsigned long long prod_mod(unsigned long long prod, unsigned long long mult, unsigned long long m) {
+	if(prod != 0 && round((ULLONG_MAX - 1)/prod) < mult) prod = pow_mod_exc_prod(mult, prod, m);
+
+	else prod = (prod * mult) % m;
+
+	return prod;
+}
+
 unsigned long long pow_mod (unsigned long long n, unsigned long long k, unsigned long long m) {
 	unsigned long long mult = n % m;
 	unsigned long long prod = 1;
 	unsigned long long MAX_NUM = sqrt(ULLONG_MAX) - 2;
 	while(k > 0) {
-		//printf("bbbbbbb\n");
 		if ((k % 2) == 1) {
-			if (prod != 0 && round((ULLONG_MAX - 1)/prod) < mult) {
-				prod = pow_mod_exc_prod(mult, prod, m);
-			}
-
-			else {
-				//printf("ggggggggggg\n");
-				prod = (prod * mult) % m;
-			}
-
+			prod = prod_mod(prod, mult, m);
 			//printf("mult = %llu  prod = %llu  k = %llu\n", mult, prod, k);
 			k--;
 		}
 
 		else {
-
-			if(mult != 0 && round((ULLONG_MAX - 1)/mult) < mult) {
-
-				mult = pow_mod_exc_mult(mult, m);
-			}
-
-			else {
-				//printf("hhhhhhhhhhhh\n");
-				mult = (mult * mult) % m;
-			}
-			
+			mult = mult_mod(mult, m);
 			//printf("mult = %llu  prod = %llu  k = %llu\n", mult, prod, k);
 			k = k/2;
 		}
 	}
 	return prod;
 
+}
+
+int rabin_miller(unsigned long long num, int a_for_test[15], unsigned long long d, int r, int max_idx) {
+	int i = 0, code_cyc = 0;
+	unsigned long long x = 0, j = 0;
+
+
+	for(i = 0; i <= max_idx; i++) {
+
+		if(num == a_for_test[i]){
+			return 1;
+		}
+		
+		code_cyc = 0;
+		x = pow_mod(a_for_test[i], d, num);
+		if((x == 1) || x == num - 1) 
+			continue;
+		
+		for (j = 0; j < r-1; j++) {
+			x = pow_mod(x, 2, num);
+			if(x == num - 1) {
+				code_cyc = 1;
+				break;
+			}
+		}
+
+		if(code_cyc == 1) 
+			continue;
+		
+		return 0;		
+	}
+
+	return 1;
 }
 
 int is_prime(unsigned long long num) {
@@ -138,14 +167,7 @@ int is_prime(unsigned long long num) {
 
 	if(num < 2) return 0;
 
-	if(num % 2 == 0)
-		return 0;
-
-	if(num % 3 == 0)
-		return 0;
-
-	if(num % 5 == 0)
-		return 0;
+	if((num % 2 == 0) || (num % 3 == 0) || (num % 5 == 0)) return 0;
 
 	for (i = num  - 1; i > 1; i = i/2) {
 		if(i % 2 != 0) 
@@ -159,58 +181,21 @@ int is_prime(unsigned long long num) {
 		a_for_test[1] = 7;
 		a_for_test[2] = 61;
 
-		for(i = 0; i <= 2; i++) {
+		return rabin_miller(num, a_for_test, d, r, 2);
+	}
 
-			if(num == a_for_test[i]){
-				return 1;
-			}
-			
-			code_cyc = 0;
-			x = pow_mod(a_for_test[i], d, num);
-			if((x == 1) || x == num - 1) 
-				continue;
-		
-			for (j = 0; j < r-1; j++) {
-				x = pow_mod(x, 2, num);
-				if(x == num - 1) {
-					code_cyc = 1;
-					break;
-				}
-			}
+	if(num >= 4759123141 && num < 3474749660383) {
+		return rabin_miller(num, a_for_test, d, r, 5);
+	}
 
-			if(code_cyc == 1) 
-				continue;
-		
-			return 0;		
-		}
-
-		return 1;
+	if(num >= 3474749660383 && num < 3825123056546413051) {
+		return rabin_miller(num, a_for_test, d, r, 8);
 	}
 
 	//printf("r = %d   d = %llu\n", r, d);
 	
-	else {
-		for(i = 0; i <= 11; i++) {
-			code_cyc = 0;
-			x = pow_mod(a_for_test[i], d, num);
-			if((x == 1) || x == num - 1) 
-				continue;
-		
-			for (j = 0; j < r-1; j++) {
-				x = pow_mod(x, 2, num);
-				if(x == num - 1) {
-					code_cyc = 1;
-					break;
-				}
-			}
-
-			if(code_cyc == 1) 
-				continue;
-		
-			return 0;		
-		}
-
-		return 1;
+	if(num >= 3825123056546413051) {
+		return rabin_miller(num, a_for_test, d, r, 11);
 	}
 }
 

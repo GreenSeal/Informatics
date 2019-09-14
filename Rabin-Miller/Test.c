@@ -33,7 +33,7 @@ int main() {
 
 	end = clock();
 
-	printf("time = %f\n", (double) end - start);
+	printf("time = %fmks\n", (double) end - start);
 
 	return 0;
 }
