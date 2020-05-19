@@ -2,7 +2,8 @@
 
 namespace Tokens {   
   enum Types {VAR, COS, SIN, TG, CTG, EXP, LN, NUM, 
-	      PLUS, MINUS, MULT, DIV, UPPER, LBR, RBR};
+	      PLUS, MINUS, MULT, DIV, UPPER, LBR, RBR, 
+	      FUNC, OP};
 }
 
 namespace Syntax {

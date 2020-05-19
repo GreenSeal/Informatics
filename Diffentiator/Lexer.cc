@@ -6,7 +6,8 @@ void Lexer::Tokenisation() {
     while(true){
       
       std::cin >> c_in;
-      std::cout << "c_in = " << c_in <<std::endl;  
+      
+      //std::cout << "c_in = " << c_in <<std::endl;  
 
       if(std::isdigit(c_in)) {
 	do {
@@ -150,7 +151,6 @@ void Lexer::Tokenisation() {
 		      std::abort();
 		     }
 
-		     int_flag = 0
 		     break;
 	           }
 	case '+':  {lexems.push_back("+");break;}

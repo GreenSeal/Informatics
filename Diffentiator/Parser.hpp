@@ -4,7 +4,6 @@
 #include "SyntaxTree.hpp"
 
 class Parser {
-public:
   Lexer lexer;
   SyntaxNodeI * tree;
   int idx = 0;
@@ -18,4 +17,6 @@ public:
   void Lexing() {
     lexer.Tokenisation();
   }
+
+  friend class Differenciator;
 };

@@ -1,5 +1,8 @@
 #pragma once
 
+#include"Types.hpp"
+#include<iostream>
+
 class SyntaxNodeI {
   Tokens::Types type;
 
@@ -9,6 +12,7 @@ class SyntaxNodeI {
   }
 
 public:
+  SyntaxNodeI() = default;
 
   SyntaxNodeI(Tokens::Types type_) {
     type = type_;
@@ -50,9 +54,11 @@ class SyntaxNodeUno : public SyntaxNodeI {
   SyntaxNodeI * left;
 
 public:
+  SyntaxNodeUno() = default;
   
   SyntaxNodeUno(Tokens::Types type_) : SyntaxNodeI(type_) {}
-
+  
+  SyntaxNodeUno(Tokens::Types type_, SyntaxNodeI* left_) : SyntaxNodeI(type_), left(left_) {}
 
   SyntaxNodeI* GetLeft() const override{
     return left;
@@ -68,8 +74,11 @@ class SyntaxNodeBin : public SyntaxNodeUno {
   SyntaxNodeI * right;
 
 public:
+  SyntaxNodeBin() = default;
 
-  SyntaxNodeBin(Tokens::Types type_) : SyntaxNodeI(type_) {}
+  SyntaxNodeBin(Tokens::Types type_) : SyntaxNodeUno(type_) {}
+
+  SyntaxNodeBin(Tokens::Types type_, SyntaxNodeI* left_, SyntaxNodeI* right_) : SyntaxNodeUno(type_, left_), right(right_) {}
 
   SyntaxNodeI* GetRight() const override{
     return right;
@@ -83,7 +92,12 @@ public:
 class SyntaxNodeNum : public SyntaxNodeI{
   int data;
 
+public:
+  SyntaxNodeNum() = default;
+
   SyntaxNodeNum(Tokens::Types type_) : SyntaxNodeI(type_) {}
+
+  SyntaxNodeNum(Tokens::Types type_, int data_) : SyntaxNodeI(type_), data(data_) {}
 
   void SetData(int data_) override{
     data = data_;
@@ -94,8 +108,8 @@ class SyntaxNodeNum : public SyntaxNodeI{
   }
 };
 
-class SyntaxTree {
+/*class SyntaxTree {
   SyntaxNodeI * root;
   SyntaxNodeI * cur1;
   SyntaxNodeI * cur2;
-};
+};*/
