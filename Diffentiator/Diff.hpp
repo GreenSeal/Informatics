@@ -4,7 +4,7 @@
 #include "Parser.hpp"
 
 class Differenciator{
-  SyntaxNodeI* tree;
+  SyntaxTree tree;
   Parser parser;
 public:
   void Parsing(){parser.Parsing();}
@@ -17,4 +17,5 @@ public:
   SyntaxNodeI* MakeSimple(SyntaxNodeI* node);
   void Print(SyntaxNodeI* node);
   void StartPrint();
+  
 };

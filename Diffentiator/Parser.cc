@@ -3,7 +3,7 @@
 using namespace Tokens;
 
 void Parser::Parsing() {
-  tree = Expr();
+  tree.root = Expr();
 }
 
 SyntaxNodeI * Parser::Expr() {

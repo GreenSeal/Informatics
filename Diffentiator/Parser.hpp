@@ -5,7 +5,7 @@
 
 class Parser {
   Lexer lexer;
-  SyntaxNodeI * tree;
+  SyntaxTree tree;
   int idx = 0;
 
   SyntaxNodeI * Expr();

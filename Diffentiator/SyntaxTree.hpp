@@ -2,6 +2,7 @@
 
 #include"Types.hpp"
 #include<iostream>
+#include<cassert>
 
 class SyntaxNodeI {
   Tokens::Types type;
@@ -25,6 +26,11 @@ public:
   void SetType(Tokens::Types type_) {
     type = type_;
   }
+
+  virtual void DeleteTree() {
+    delete this;
+  }
+
   virtual SyntaxNodeI* GetRight() const{
     return NULL;
   }
@@ -47,10 +53,13 @@ public:
   virtual void SetData(int data_) {
     MessageAndAbort();
   }
+
+  virtual ~SyntaxNodeI() {}
     
 };
 
 class SyntaxNodeUno : public SyntaxNodeI {
+protected:
   SyntaxNodeI * left;
 
 public:
@@ -67,9 +76,16 @@ public:
   void SetLeft(SyntaxNodeI * left_) override {
     left = left_;
   }
+
+  virtual void DeleteTree() override{
+    left -> DeleteTree();
+    delete this;
+  }
+
+  virtual ~SyntaxNodeUno() {}
 };
 
-class SyntaxNodeBin : public SyntaxNodeUno {
+class SyntaxNodeBin final: public SyntaxNodeUno {
   
   SyntaxNodeI * right;
 
@@ -87,9 +103,15 @@ public:
   void SetRight(SyntaxNodeI * right_) override{
     right = right_;
   }
+
+  void DeleteTree() override {
+    left -> DeleteTree();
+    right -> DeleteTree();
+    delete this;
+  }
 };
 
-class SyntaxNodeNum : public SyntaxNodeI{
+class SyntaxNodeNum final: public SyntaxNodeI{
   int data;
 
 public:
@@ -106,10 +128,25 @@ public:
   int GetData() const override{
     return data;
   }
+  
+  void DeleteTree() {
+    delete this;
+  }
 };
 
-/*class SyntaxTree {
+struct SyntaxTree {
   SyntaxNodeI * root;
-  SyntaxNodeI * cur1;
-  SyntaxNodeI * cur2;
-};*/
+
+  void DeleteTree(SyntaxNodeI * node) {
+    assert(node != NULL);
+    if (node -> GetLeft() != NULL) DeleteTree(node -> GetLeft());
+    if (node -> GetRight() != NULL) DeleteTree(node -> GetRight());
+    
+    delete node;
+  }
+
+  ~SyntaxTree() {
+    DeleteTree(root);
+  }
+
+};

@@ -93,9 +93,7 @@ SyntaxNodeI * Differenciator::MakeDiff(SyntaxNodeI* node) {
     return op;
   }
   
-  else if(node -> GetType() == Types::DIV) {
-  //DO diff DIV
-  }
+  else if(node -> GetType() == Types::DIV) {}
 
   else if(node -> GetType() == Types::NUM) {
     SyntaxNodeI * num = new SyntaxNodeNum(Types::NUM, 0);
@@ -128,7 +126,16 @@ SyntaxNodeI * Differenciator::MakeDiff(SyntaxNodeI* node) {
   else if(node -> GetType() == LN) {}
   else if(node -> GetType() == EXP) {}
 
-  else if(node -> GetType() == UPPER) {}
+  else if(node -> GetType() == UPPER) {
+    assert(node -> GetRight() -> GetType() == Types::NUM);
+    assert(node -> GetRight() -> GetData() != 0 && node -> GetRight() -> GetData() != 1);
+    SyntaxNodeI* num = new SyntaxNodeNum(Types::NUM, node -> GetRight() -> GetData());
+    SyntaxNodeI* upper = CopyTree(node);
+    upper -> GetRight() -> SetData(num -> GetData() - 1);
+    SyntaxNodeI* mult1 = new SyntaxNodeBin(Types::MULT, num, upper);
+    SyntaxNodeI* mult2 = new SyntaxNodeBin(Types::MULT, mult1, MakeDiff(upper -> GetLeft()));
+    return mult2; 
+  }
 
   else {std::cout << "Unexpected type in expression\n";
         std::abort();
@@ -138,35 +145,40 @@ SyntaxNodeI * Differenciator::MakeDiff(SyntaxNodeI* node) {
 SyntaxNodeI* Differenciator::MakeSimple(SyntaxNodeI* node) {
   assert(node != NULL);
   
-  if(node -> GetLeft() != NULL) node -> SetLeft(MakeSimple(node -> GetLeft()));
   if(node -> GetRight() != NULL) node -> SetRight(MakeSimple(node -> GetRight()));
+  if(node -> GetLeft() != NULL) node -> SetLeft(MakeSimple(node -> GetLeft()));
+  //else return node;
 
+  //Bad----------------------------
   if((node -> GetType() == Types::MULT && 
      ((node -> GetRight() -> GetType() == Types::NUM && node -> GetRight() -> GetData() == 1) || 
      (node -> GetLeft() -> GetType() == Types::NUM && node -> GetLeft() -> GetData() == 0))) || 
      
      ((node -> GetType() == Types::PLUS || node -> GetType() == Types::MINUS) && 
-      node -> GetRight() -> GetType() == Types::NUM && node -> GetRight() -> GetData() == 0)) {
+      node -> GetRight() -> GetType() == Types::NUM && node -> GetRight() -> GetData() == 0) ||
+
+     ((node -> GetType() == Types::UPPER) && (node -> GetRight() -> GetData() == 1))) {
 
 
-    //std::cout << "Hi, checker!\n"; 
+    std::cout << "Hi, checker!\n"; 
     SyntaxNodeI* newnode = CopyTree(node -> GetLeft());
-    delete node -> GetLeft();
-    delete node -> GetRight();
-    delete node;
+    node -> DeleteTree();
     return newnode;
   }
 
 
-  else if(node -> GetType() == Types::MULT && 
-     (node -> GetLeft() -> GetType() == Types::NUM && node -> GetLeft() -> GetData() == 1)) {
+  else if((node -> GetType() == Types::MULT && 
+     (node -> GetLeft() -> GetType() == Types::NUM && node -> GetLeft() -> GetData() == 1)) ||
+		  
+     (node -> GetType() == Types::PLUS && 
+      node -> GetLeft() -> GetType() == Types::NUM && node -> GetLeft() -> GetData() == 0)) {
     //std::cout << "Hi, checker!\n"; 
     SyntaxNodeI* newnode = CopyTree(node -> GetRight());
-    delete node -> GetLeft();
-    delete node -> GetRight();
-    delete node;
+    node -> DeleteTree();
     return newnode;
   }
+   
+  //----------------------------------
 
   else return node;
 }
@@ -175,16 +187,26 @@ void Differenciator::Print(SyntaxNodeI * node) {
   assert(node != NULL);	
   Types type = node -> GetType();
   if(type == Types::PLUS || type == Types::MINUS || 
-     type == Types::MULT || type == Types::DIV) {
+     type == Types::MULT || type == Types::DIV || 
+     type == Types::UPPER) {
     
-    if(GetTokenType(node -> GetLeft()) != Types::NUM && GetTokenType(node -> GetLeft()) != VAR && 
-       GetTokenType(node -> GetLeft()) != Types::FUNC) std::cout << "(";
+    if((/*(type == Types::MINUS || type == Types::PLUS) &&*/ GetTokenType(node -> GetLeft()) == Types::NUM || 
+       GetTokenType(node -> GetLeft()) == VAR || GetTokenType(node -> GetLeft()) == Types::FUNC)) {} 
+      
+    else { if(((type == MULT) && node -> GetLeft() -> GetType() == Types::MULT)){}
+    
+           else std::cout << "(";}
   
     Print(node -> GetLeft());
 
     
-    if(GetTokenType(node -> GetLeft()) != Types::NUM && GetTokenType(node -> GetLeft()) != VAR && 
-       GetTokenType(node -> GetLeft()) != Types::FUNC) std::cout << ")";
+    if((/*(type == Types::PLUS || type == Types::MINUS) &&*/ GetTokenType(node -> GetLeft()) == Types::NUM || 
+       GetTokenType(node -> GetLeft()) == VAR || GetTokenType(node -> GetLeft()) == Types::FUNC)) {}
+		    
+    else {  if(((type == MULT) && node -> GetLeft() -> GetType() == Types::MULT)){}
+
+    else std::cout << ")";}
+
     
     switch(type) {
       case Types::PLUS : {std::cout << " + "; break;}
@@ -194,13 +216,21 @@ void Differenciator::Print(SyntaxNodeI * node) {
       case Types::UPPER: {std::cout << " ^ "; break;}
     }
     
-    if(GetTokenType(node -> GetRight()) != Types::NUM && GetTokenType(node -> GetRight()) != VAR && 
-       GetTokenType(node -> GetRight()) != Types::FUNC) std::cout << "(";
+    if((GetTokenType(node -> GetRight()) == Types::NUM || 
+       GetTokenType(node -> GetRight()) == VAR || GetTokenType(node -> GetRight()) == Types::FUNC)) {}
+       
+    else {if(((type == MULT) && node -> GetRight() -> GetType() == Types::MULT)){}
+    
+    else std::cout << "(";}
     
     Print(node -> GetRight());
 
-    if(GetTokenType(node -> GetRight()) != Types::NUM && GetTokenType(node -> GetRight()) != VAR && 
-       GetTokenType(node -> GetRight()) != Types::FUNC) std::cout << ")";
+    if((/*(type == Types::MINUS || type == Types::PLUS) &&*/ GetTokenType(node -> GetRight()) == Types::NUM || 
+       GetTokenType(node -> GetRight()) == VAR || GetTokenType(node -> GetRight()) == Types::FUNC)) {} 
+
+    else {if(((type == MULT) && node -> GetRight() -> GetType() == Types::MULT)) {}
+    
+    else std::cout << ")";}
   }
 
   else if(type == Types::COS || type == Types::SIN || type == Types::LN ||
@@ -227,10 +257,20 @@ void Differenciator::Print(SyntaxNodeI * node) {
 }
 
 void Differenciator::StartDiff() {
-  tree = MakeDiff(parser.tree);
+  tree.root = MakeDiff(parser.tree.root);
 }
 
 void Differenciator::StartPrint() {
-  MakeSimple(tree);
-  Print(tree);
+  tree.root = MakeSimple(tree.root);
+  std::cout << "Hi, simple!\n";
+  Print(tree.root);
 }
+
+
+/*void DeleteTree(SyntaxNodeI * node) {
+  assert(node != NULL);
+  if (node -> GetLeft() != NULL) DeleteTree(node -> GetLeft());
+  if (node -> GetRight() != NULL) DeleteTree(node -> GetRight());
+    
+  delete node;
+}*/

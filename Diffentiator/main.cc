@@ -21,4 +21,5 @@ int main() {
   std::cout << "Printing...\n";
   diff -> StartPrint();
   std::cout << "done\n";
+  delete diff;
 }
